@@ -339,11 +339,17 @@ void init_usb_driver(USBDriver *usbp) {
      * Note, a delay is inserted in order to not have to disconnect the cable
      * after a reset.
      */
+    osalSysLock();
     usbDisconnectBus(usbp);
     usbStop(usbp);
+    osalSysUnlock();
+
     wait_ms(50);
+
+    osalSysLock();
     usbStart(usbp, &usbcfg);
     usbConnectBus(usbp);
+    osalSysUnlock();
 }
 
 __attribute__((weak)) void restart_usb_driver(USBDriver *usbp) {

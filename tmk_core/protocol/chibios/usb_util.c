@@ -18,8 +18,10 @@
 #include "usb_util.h"
 
 void usb_disconnect(void) {
+    osalSysLock();
     usbDisconnectBus(&USB_DRIVER);
     usbStop(&USB_DRIVER);
+    osalSysUnlock();
 }
 
 bool usb_connected_state(void) {
