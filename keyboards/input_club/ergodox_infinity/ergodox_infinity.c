@@ -3,6 +3,8 @@
 #include <hal.h>
 #include <string.h>
 #include "eeconfig.h"
+#include "split_util.h"
+#include "usb_util.h"
 
 #define RED_PIN 1
 #define GREEN_PIN 2
@@ -262,6 +264,11 @@ __attribute__((weak)) void st7565_task_user(void) {
         format_layer_bitmap_string(layer_buffer, 16);
         st7565_write_ln(layer_buffer, false);
         st7565_write_ln("  1=On    D=Default", false);
+
+        if (!usb_connected_state()) {
+            st7565_set_cursor(0, 3);
+            st7565_write("     DISCONNECTED    ", TRUE);
+        }
     } else {
         // Draw logo
         static const char qmk_logo[] = {
@@ -272,6 +279,11 @@ __attribute__((weak)) void st7565_task_user(void) {
 
         st7565_write(qmk_logo, false);
         st7565_write("  Infinity  Ergodox  ", false);
+    }
+
+    if (split_mcu_reset_is_pending()) {
+        st7565_set_cursor(0, 3);
+        st7565_write("      RESETTING      ", TRUE);
     }
 }
 #endif
