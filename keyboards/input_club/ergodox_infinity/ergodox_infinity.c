@@ -293,6 +293,19 @@ void usart_master_init(SerialDriver **driver) {
     PORTA->PCR[1] = PORTx_PCRn_PE | PORTx_PCRn_PS | PORTx_PCRn_PFE | PORTx_PCRn_MUX(2);
     PORTA->PCR[2] = PORTx_PCRn_DSE | PORTx_PCRn_SRE | PORTx_PCRn_MUX(2);
 
+    // Make the USB data signals high-z to prevent interference with USB communication.
+    // avoids linux dmesg output like: `usb usb4-port4: Cannot enable. Maybe the USB cable is bad?`
+    // Set PTE0 and PTE1 to GPIO (ALT1) without touching other PCR bits
+    PORTE->PCR[0] = (PORTE->PCR[0] & ~PORTx_PCRn_MUX_MASK) | PORTx_PCRn_MUX(1);
+    PORTE->PCR[1] = (PORTE->PCR[1] & ~PORTx_PCRn_MUX_MASK) | PORTx_PCRn_MUX(1);
+
+    // Disable pull-up/pull-down resistors without touching other PCR bits
+    PORTE->PCR[0] &= ~PORTx_PCRn_PE;
+    PORTE->PCR[1] &= ~PORTx_PCRn_PE;
+
+    // Set pins as input (high-Z)
+    GPIOE->PDDR &= ~( (1U << 0) | (1U << 1) );
+
     // driver is set to SD1 in config.h
 }
 
